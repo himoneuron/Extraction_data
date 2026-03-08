@@ -1,0 +1,43 @@
+server:
+  port: 8080
+
+spring:
+  # --- Servlet Multipart (File Upload) Configuration ---
+  servlet:
+    multipart:
+      max-file-size: 50MB   # Max size for a single file (User's value is fine)
+      max-request-size: 55MB # Max size for the entire request (must be > max-file-size)
+
+  # --- Asynchronous Task Executor Configuration ---
+  # Configures the "pdfExecutor" bean from AsyncConfig
+  task:
+    execution:
+      pool:
+        core-size: 4      # Start with 4 threads (adjust based on server cores)
+        max-size: 4       # Fixed pool size
+        queue-capacity: 50 # Max 50 pending jobs before rejection
+      thread-name-prefix: PDFExecutor-
+
+  # --- Spring Batch Configuration (for Enterprise solution) ---
+  batch:
+    job:
+      enabled: false  #!! IMPORTANT: Prevents all jobs from running on application startup
+    jdbc:
+      initialize-schema: always # Creates Batch metadata tables on startup
+
+  # --- Database Configuration (for Batch metadata and Contact storage) ---
+  datasource:
+    url: jdbc:h2:mem:pdfdb  # In-memory database
+    username: sa
+    password: password
+    driver-class-name: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update # Creates 'contacts' table from @Entity
+
+logging:
+  level:
+    root: INFO
+    com.example: DEBUG  # Set your package to DEBUG for detailed logs
+    org.springframework.batch: INFO # Good for seeing job/step status
